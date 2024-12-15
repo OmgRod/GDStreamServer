@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Stream Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #messages {
+      border: 1px solid #ccc;
+      padding: 10px;
+      width: 300px;
+      height: 300px;
+      overflow-y: auto;
+    }
+    #input {
+      margin-top: 10px;
+      width: 300px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Live Chat</h1>
+  <div id="messages"></div>
+  <input type="text" id="input" placeholder="Type a message...">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+  <script>
+    const streamID = window.location.pathname.split('/')[2]; // Extract streamID from URL
+    const socket = new WebSocket(`ws://localhost:3000/stream/${streamID}/chat`);
+    
+    socket.onopen = () => {
+      console.log('Connected to chat');
+    };
+    
+    socket.onmessage = (event) => {
+      const messagesDiv = document.getElementById('messages');
+      const message = document.createElement('div');
+      message.textContent = event.data;
+      messagesDiv.appendChild(message);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    };
+
+    document.getElementById('input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const message = e.target.value;
+        socket.send(message);
+        e.target.value = ''; // Clear input field
+      }
+    });
+  </script>
+</body>
+</html>
